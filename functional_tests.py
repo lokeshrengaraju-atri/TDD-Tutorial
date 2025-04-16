@@ -24,25 +24,43 @@ class NewVisitorTest(unittest.TestCase):
         header_text = self.browser.find_element(By.TAG_NAME, "h1").text
         self.assertIn("To-Do",header_text)
 
-        # check the input box, and what is the placeholder
+        # # check the input box, and what is the placeholder
+        # inputbox = self.browser.find_element(By.ID, "id_new_item")
+        # self.assertEqual(inputbox.get_attribute("placeholder"), "Enter a to-do item")
+
+        # # User enters the item in input box
+        # inputbox.send_keys("Buy peacock feathers")
+
+        # # When the user hits enter, the page updates and shows the item
+        # inputbox.send_keys(Keys.ENTER)
+        # time.sleep(3)
+
+        # table = self.browser.find_element(By.ID, "id_list_table")
+        # rows = table.find_elements(By.TAG_NAME, "tr")
+        # self.assertIn("1: Buy peacock feathers", [row.text for row in rows])
+
         inputbox = self.browser.find_element(By.ID, "id_new_item")
-        self.assertEqual(inputbox.get_attribute("placeholder"), "Enter a to-do item")
-
-        # User enters the item in input box
-        inputbox.send_keys("Buy peacock feathers")
-
-        # When the user hits enter, the page updates and shows the item
+        inputbox.send_keys("Use peacock feathers to make a fly")
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
+        # The page updates again, and now shows both items on her list
         table = self.browser.find_element(By.ID, "id_list_table")
         rows = table.find_elements(By.TAG_NAME, "tr")
-        self.assertTrue(any(row.text == "1:Buy peacock feathers" for row in rows),
-                        "New to-do item did not appear in table",
-                        )
+        self.assertIn(
+            "1: Buy peacock feathers",
+            [row.text for row in rows],
+        )
+        self.assertIn(
+            "2: Use peacock feathers to make a fly",
+            [row.text for row in rows],
+        )
 
 
-        self.fail("Finsih the test!")
+
+
+
+        # self.fail("Finsih the test!")
 
 
 if __name__ == "__main__":
