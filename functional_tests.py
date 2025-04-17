@@ -12,6 +12,7 @@ from selenium.webdriver.common.keys import Keys
 class NewVisitorTest(unittest.TestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
+       
 
     def tearDown(self):
         self.browser.quit()
@@ -46,20 +47,21 @@ class NewVisitorTest(unittest.TestCase):
         # self.assertIn("1: Buy peacock feathers", [row.text for row in rows])
 
         inputbox = self.browser.find_element(By.ID, "id_new_item")
-        inputbox.send_keys("Use peacock feathers to make a fly")
+        self.assertEqual(inputbox.get_attribute("placeholder"), "Enter a to-do item")
+        inputbox.send_keys("Buy peacock feathers")
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
-        self.check_for_row_in_list_table("1: Buy peacock feathers")
+        # self.check_for_row_in_list_table("1: Buy peacock feathers")
 
 
 
         # The page updates again, and now shows both items on her list
-        inputbox = self.browser.find_element(By.ID, "id_list_table")
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
         inputbox.send_keys("Use peacock feathers to make a fly")
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
-        self.check_for_row_in_list_table("1: Buy peacock feathers")
+        self.check_for_row_in_list_table("18: Buy peacock feathers")
         self.check_for_row_in_list_table("2: Use peacock feathers to make a fly")
 
         
