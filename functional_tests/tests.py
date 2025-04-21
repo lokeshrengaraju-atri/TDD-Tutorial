@@ -1,0 +1,154 @@
+import unittest
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from django.test import LiveServerTestCase  
+from selenium.common.exceptions import WebDriverException
+
+MAX_WAIT = 5
+
+
+
+
+# browser = webdriver.Firefox()
+
+class NewVisitorTest(LiveServerTestCase):
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+       
+
+    def tearDown(self):
+        self.browser.quit()
+    
+    def wait_for_row_in_list_table(self, row_text):
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element(By.ID, "id_list_table")
+                rows = table.find_elements(By.TAG_NAME, "tr")
+                self.assertIn(row_text, [row.text for row in rows])
+                return 
+            except (AssertionError,WebDriverException):
+                if time.time() - start_time > MAX_WAIT:
+                    raise
+                time.sleep(0.5)
+        
+
+
+
+    def test_can_start_a_todo_list(self):
+        self.browser.get(self.live_server_url)
+
+        # Check the title and header of the page.
+        self.assertIn("To-Do", self.browser.title)
+        header_text = self.browser.find_element(By.TAG_NAME, "h1").text
+        self.assertIn("To-Do",header_text)
+
+        # # check the input box, and what is the placeholder
+        # inputbox = self.browser.find_element(By.ID, "id_new_item")
+        # self.assertEqual(inputbox.get_attribute("placeholder"), "Enter a to-do item")
+
+        # # User enters the item in input box
+        # inputbox.send_keys("Buy peacock feathers")
+
+        # # When the user hits enter, the page updates and shows the item
+        # inputbox.send_keys(Keys.ENTER)
+        # time.sleep(3)
+
+        # table = self.browser.find_element(By.ID, "id_list_table")
+        # rows = table.find_elements(By.TAG_NAME, "tr")
+        # self.assertIn("1: Buy peacock feathers", [row.text for row in rows])
+
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        self.assertEqual(inputbox.get_attribute("placeholder"), "Enter a to-do item")
+        inputbox.send_keys("Buy peacock feathers")
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
+
+    
+        # self.check_for_row_in_list_table("1: Buy peacock feathers")
+
+
+
+        # The page updates again, and now shows both items on her list
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox.send_keys("Use peacock feathers to make a fly")
+        inputbox.send_keys(Keys.ENTER)
+       
+
+        self.wait_for_row_in_list_table("1: Buy peacock feathers")
+        self.wait_for_row_in_list_table("2: Use peacock feathers to make a fly")
+
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox.send_keys("Buy peacock feathers")
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table("1: Buy peacock feathers")
+
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, "/lists/.+")
+
+        self.browser.delete_all_cookies()
+
+        # new user visits and not seeing the old user's list
+
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element(By.TAG_NAME, "body").text     
+        self.assertNotIn("Buy peacock feathers", page_text)
+        self.assertNotIn("make a fly", page_text)
+
+        # new user starts a new list
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox.send_keys("Buy milk")
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table("1: Buy milk")
+
+        # new user gets a unique URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, "/lists/.+")
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # there is no trace of the other user's list
+        page_text = self.browser.find_element(By.TAG_NAME, "body").text
+        self.assertNotIn("Buy peacock feathers", page_text)
+        self.assertIn("Buy milk", page_text)
+
+        
+    
+
+
+
+
+
+        # self.fail("Finsih the test!")
+
+
+# if __name__ == "__main__":
+#     unittest.main()
+
+
+
+
+# Open the web application
+# Make sure you have the server running on localhost:8000
+# and the browser can access it.
+# browser.get("http://localhost:8000")
+
+# # Check the title of the page
+# assert "To-Do" in browser.title
+
+# # Entering the first to-do item
+
+# # when submitted it should, the page should refresh and show the item
+
+# # It should show the text box to add in the next item
+
+# # when submitted it should, the page should refresh and show both the items
+
+# # done entering the items
+
+# browser.quit()
+
