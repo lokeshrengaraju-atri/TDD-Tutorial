@@ -3,7 +3,7 @@ name: Run Tests on Push to Feature Branch
 on:
   push:
     branches:
-      - feature_TDD_Tutorial
+      - feature/*
 
 jobs:
   test:
